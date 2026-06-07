@@ -1,10 +1,11 @@
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: container-postgres
     environment:
-      POSTGRES_USER: container_app
-      POSTGRES_PASSWORD: container_app
-      POSTGRES_DB: container_verification
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -12,20 +13,58 @@ services:
 
   redis:
     image: redis:7-alpine
+    container_name: container-redis
     ports:
       - "6379:6379"
 
   minio:
     image: minio/minio:latest
+    container_name: container-minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
       - minio-data:/data
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    container_name: container-api
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@container-postgres:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://container-redis:6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      CORS_ORIGINS: http://localhost:3000
+      COOKIE_SECURE: "false"
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    container_name: container-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      # NEXT_PUBLIC_API_URL is for client-side fetches from the browser
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      PORT: 3000
+      NODE_ENV: production
 
 volumes:
   postgres-data:

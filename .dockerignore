@@ -1,0 +1,12 @@
+node_modules
+dist
+.next
+.git
+.env
+.env.local
+*.log
+docker-setup-todo.md
+frontend-foundation-todo.md
+industrial-brutalist-todo.md
+container-verification-vibe-docs
+kontainer-verification
