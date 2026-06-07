@@ -1,0 +1,54 @@
+<h2>Design Spec: Section 2 - Component Architecture</h2>
+<p class="subtitle">Tactical redesign of interface elements and Dark Mode logic.</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Component: Tactical Button</div>
+    <div class="mockup-body" style="background: #F4F4F0; padding: 20px; display: flex; flex-direction: column; gap: 20px;">
+      <button style="background: #050505; color: #fff; border: none; padding: 15px 30px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; width: 100%; text-align: left; position: relative;">
+        SUBMIT_INSPECTION
+        <span style="position: absolute; right: 15px;">→</span>
+      </button>
+      
+      <button style="background: #E61919; color: #fff; border: none; padding: 15px 30px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; width: 100%; text-align: left; position: relative;">
+        EMERGENCY_REJECT
+        <span style="position: absolute; right: 15px;">!</span>
+      </button>
+      
+      <button style="background: transparent; color: #050505; border: 2px solid #050505; padding: 12px 30px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; width: 100%; text-align: left;">
+        [ CANCEL_ACTION ]
+      </button>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Industrial Inversion (Dark Mode)</div>
+    <div class="mockup-body" style="background: #0A0A0A; padding: 20px; color: #EAEAEA; border: 1px solid #EAEAEA;">
+      <div style="border-bottom: 2px solid #EAEAEA; margin-bottom: 15px; padding-bottom: 5px; font-family: monospace; font-size: 0.8rem;">
+        MODE: INVERTED_DOC_PRINT
+      </div>
+      <h2 style="font-size: 2.5rem; font-weight: 900; text-transform: uppercase; line-height: 0.9; margin: 0 0 15px 0;">SYSTEM<br>READY</h2>
+      <div style="border: 1px solid #EAEAEA; padding: 10px; font-family: monospace;">
+        > SESSION_ID: 0x88F2<br>
+        > QUEUE_DEPTH: 12
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2.1 Component Directives</h3>
+  <ul>
+    <li><strong>Buttons:</strong> Zero radius. Solid backgrounds or heavy 2px borders. Use ASCII markers like <code>[ ]</code> or <code>→</code> for tactical feel.</li>
+    <li><strong>Inputs:</strong> Flat background, 1px bottom border only, or full 1px box. Monospace text input.</li>
+    <li><strong>Cards:</strong> Replaced by "Blocks." No shadows. Delineated by 1px solid grid lines.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>2.2 Dark Mode: Industrial Inversion</h3>
+  <ul>
+    <li><strong>Transition:</strong> Absolute color flip. Substrate becomes <code>#0A0A0A</code>, Ink becomes <code>#EAEAEA</code>.</li>
+    <li><strong>Aviation Red:</strong> Remains constant (<code>#E61919</code>) for both modes to maintain hazard consistency.</li>
+  </ul>
+</div>

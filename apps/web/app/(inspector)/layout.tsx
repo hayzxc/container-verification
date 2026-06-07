@@ -1,4 +1,5 @@
 import { RoleGate } from "@/components/RoleGate";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function InspectorLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,13 +10,14 @@ export default function InspectorLayout({ children }: { children: React.ReactNod
             <div className="w-3 h-3 bg-hazard animate-pulse" />
             VERIF-SYS // TERMINAL_01
           </div>
-          <div className="flex gap-6">
+          <div className="flex gap-6 items-center">
             <div className="telemetry hidden sm:block text-[10px] text-ink">
               <span className="opacity-50 mr-1 font-bold">LOC:</span> JKTA-PORT-A
             </div>
             <div className="telemetry hidden sm:block text-[10px] text-ink">
               <span className="opacity-50 mr-1 font-bold">SIGNAL:</span> 100%
             </div>
+            <ThemeToggle />
           </div>
         </header>
         <main className="bg-substrate overflow-auto relative">

@@ -3,10 +3,16 @@ import { useAuthStore } from "@/stores/auth.store";
 import { Button } from "@/components/ui/button";
 import { logoutApi } from "@/features/auth/auth.api";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function InspectorDashboard() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
+  const [nodeId, setNodeId] = useState<string>("");
+
+  useEffect(() => {
+    setNodeId(Math.random().toString(36).substring(7).toUpperCase());
+  }, []);
 
   async function handleLogout() {
     try { await logoutApi(); } catch (e) {}
@@ -99,7 +105,7 @@ export default function InspectorDashboard() {
           PROPRIETARY SYSTEM // DO NOT DISCLOSE
         </div>
         <div className="telemetry text-[9px] opacity-40 font-bold text-ink">
-          SECURE_NODE: {Math.random().toString(36).substring(7).toUpperCase()}
+          SECURE_NODE: {nodeId || "LOADING..."}
         </div>
       </footer>
     </div>
