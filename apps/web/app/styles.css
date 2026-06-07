@@ -1,9 +1,58 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-substrate: var(--substrate);
+  --color-ink: var(--ink);
+  --color-hazard: #E61919;
+
+  --color-background: var(--substrate);
+  --color-foreground: var(--ink);
+
+  --color-primary: var(--ink);
+  --color-primary-foreground: var(--substrate);
+
+  --color-accent: #E61919;
+  --color-accent-foreground: var(--substrate);
+
+  --color-border: var(--ink);
+
+  --radius-lg: 0px;
+  --radius-md: 0px;
+  --radius-sm: 0px;
+
+  --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-plex-mono), monospace;
+}
 
 @layer base {
+  :root {
+    --substrate: #F4F4F0;
+    --ink: #050505;
+  }
+
+  .dark {
+    --substrate: #0A0A0A;
+    --ink: #EAEAEA;
+  }
+
+  * {
+    @apply border-ink outline-none transition-none !rounded-none;
+  }
+
   body {
-    @apply bg-background text-text;
+    @apply bg-background text-foreground font-sans selection:bg-hazard selection:text-white;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .macro-type {
+    font-size: clamp(2.5rem, 10vw, 8rem);
+    letter-spacing: -0.05em;
+    @apply font-black uppercase leading-[0.9];
+  }
+
+  .telemetry {
+    @apply font-mono uppercase text-[12px];
   }
 }
