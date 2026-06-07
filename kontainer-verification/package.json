@@ -1,0 +1,11 @@
+{
+  "name": "kontainer-verification",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "corepack pnpm -r dev",
+    "build": "corepack pnpm -r build",
+    "lint": "corepack pnpm -r lint",
+    "test": "corepack pnpm -r test"
+  }
+}

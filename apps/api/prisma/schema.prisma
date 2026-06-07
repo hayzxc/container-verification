@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  INSPECTOR
+  AUDITOR
+}
+
+enum InspectionType {
+  ARRIVAL
+  DEPARTURE
+  PERIODIC
+}
+
+enum InspectionStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  CLARIFICATION
+}
+
+enum PhotoAngle {
+  FRONT
+  BACK
+  LEFT
+  RIGHT
+  INTERIOR
+  SERIAL
+  OTHER
+}
+
+enum OcrStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  CREATE
+  UPDATE
+  DELETE
+  VERIFY
+  REJECT
+  CLARIFY
+  EXPORT
+  WEBHOOK_DISPATCH
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  fullName     String    @db.VarChar(150)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @db.VarChar(255)
+  role         UserRole
+  phone        String?   @db.VarChar(30)
+  profileUrl   String?
+  isActive     Boolean   @default(true)
+  refreshTokenHash String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  inspections  InspectionSession[] @relation("InspectorSessions")
+  verified     InspectionSession[] @relation("VerifiedSessions")
+  auditLogs    AuditLog[]
+}
+
+model InspectionSession {
+  id             String           @id @default(uuid()) @db.Uuid
+  containerId    String           @db.VarChar(20)
+  inspectorId    String           @db.Uuid
+  inspectionType InspectionType
+  locationName   String           @db.VarChar(255)
+  latitude       Decimal?         @db.Decimal(9, 6)
+  longitude      Decimal?         @db.Decimal(9, 6)
+  status         InspectionStatus @default(DRAFT)
+  notes          String?
+  adminComment   String?
+  verifiedById   String?          @db.Uuid
+  verifiedAt     DateTime?
+  submittedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  inspector      User              @relation("InspectorSessions", fields: [inspectorId], references: [id])
+  verifiedBy     User?             @relation("VerifiedSessions", fields: [verifiedById], references: [id])
+  photos         InspectionPhoto[]
+  auditLogs      AuditLog[]
+
+  @@index([containerId])
+  @@index([status])
+  @@index([inspectorId])
+  @@index([createdAt])
+  @@index([locationName])
+}
+
+model InspectionPhoto {
+  id             String       @id @default(uuid()) @db.Uuid
+  sessionId      String       @db.Uuid
+  storageKey     String
+  storageUrl     String?
+  thumbnailKey   String?
+  photoAngle     PhotoAngle
+  mimeType       String       @db.VarChar(100)
+  fileSizeKb     Int
+  width          Int?
+  height         Int?
+  resolution     String?      @db.VarChar(20)
+  exifTimestamp  DateTime?
+  deviceInfo     String?      @db.VarChar(255)
+  latitude       Decimal?     @db.Decimal(9, 6)
+  longitude      Decimal?     @db.Decimal(9, 6)
+  uploadedAt     DateTime     @default(now())
+
+  session        InspectionSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  ocrResult      OcrResult?
+
+  @@index([sessionId])
+  @@index([photoAngle])
+}
+
+model OcrResult {
+  id               String    @id @default(uuid()) @db.Uuid
+  photoId          String    @unique @db.Uuid
+  status           OcrStatus @default(QUEUED)
+  detectedSerial   String?   @db.VarChar(20)
+  confirmedSerial  String?   @db.VarChar(20)
+  confidenceScore  Float?
+  boundingBox      Json?
+  damageLabels     Json?
+  isCorrected      Boolean   @default(false)
+  errorMessage     String?
+  processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  photo            InspectionPhoto @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model WebhookEndpoint {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(120)
+  url         String
+  secret      String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deliveries  WebhookDelivery[]
+}
+
+model WebhookDelivery {
+  id          String   @id @default(uuid()) @db.Uuid
+  endpointId  String   @db.Uuid
+  eventType   String   @db.VarChar(100)
+  payload     Json
+  statusCode  Int?
+  success     Boolean  @default(false)
+  error       String?
+  attempts    Int      @default(0)
+  nextRetryAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  endpoint    WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId])
+  @@index([success])
+  @@index([nextRetryAt])
+}
+
+model AuditLog {
+  id           String      @id @default(uuid()) @db.Uuid
+  userId       String?     @db.Uuid
+  sessionId    String?     @db.Uuid
+  action       AuditAction
+  entityType   String      @db.VarChar(50)
+  entityId     String?     @db.Uuid
+  metadata     Json?
+  ipAddress    String?     @db.Inet
+  userAgent    String?
+  timestamp    DateTime    @default(now())
+
+  user         User?       @relation(fields: [userId], references: [id])
+  session      InspectionSession? @relation(fields: [sessionId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([sessionId])
+  @@index([action])
+  @@index([timestamp])
+}

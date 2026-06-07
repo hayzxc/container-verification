@@ -1,0 +1,9 @@
+{
+  "name": "@kontainer-verification/shared",
+  "private": true,
+  "scripts": {
+    "build": "echo \"TODO: shared build\"",
+    "lint": "echo \"TODO: shared lint\"",
+    "test": "echo \"TODO: shared tests\""
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "generated_files": [
+    "README.md",
+    "01_PROJECT_CONTEXT.md",
+    "02_ARCHITECTURE.md",
+    "03_SETUP.md",
+    "04_DATABASE_SCHEMA.md",
+    "05_API_CONTRACTS.md",
+    "06_BACKEND_GUIDE.md",
+    "07_FRONTEND_GUIDE.md",
+    "08_PWA_OFFLINE_CAMERA.md",
+    "09_STORAGE_OCR_CV_PIPELINE.md",
+    "10_UI_UX_DESIGN_SYSTEM.md",
+    "11_SECURITY_RBAC_AUDIT.md",
+    "12_TESTING_QA.md",
+    "13_DEPLOYMENT_DEVOPS.md",
+    "14_SPRINT_WORKFLOW.md",
+    "15_AI_CODING_AGENT_RULES.md",
+    "16_TASK_BREAKDOWN.md"
+  ],
+  "file_count": 17,
+  "purpose": "Vibe coding / AI-assisted development documentation pack for container verification app"
+}

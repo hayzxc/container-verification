@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "deslopify": {
+      "source": "glaforge/deslopify",
+      "sourceType": "github",
+      "skillPath": "deslopify/SKILL.md",
+      "computedHash": "139a1024e45fa621f2b1bb94bf87c69bc42e92570aae841beabe55e26e926799"
+    }
+  }
+}
