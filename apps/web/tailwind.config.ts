@@ -20,7 +20,7 @@ const config: Config = {
           foreground: "var(--substrate)",
         },
         accent: {
-          DEFAULT: "var(--ink)",
+          DEFAULT: "#E61919",
           foreground: "var(--substrate)",
         },
         border: "var(--ink)",
@@ -31,8 +31,8 @@ const config: Config = {
         sm: "0px",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        mono: ["IBM Plex Mono", "monospace"],
+        sans: ["var(--font-inter)", "sans-serif"],
+        mono: ["var(--font-plex-mono)", "monospace"],
       },
     },
   },

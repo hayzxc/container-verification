@@ -14,17 +14,20 @@
   }
 
   * {
-    @apply border-border outline-none transition-none !rounded-none;
+    @apply border-ink outline-none transition-none !rounded-none;
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans selection:bg-hazard selection:text-white;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer utilities {
   .macro-type {
-    @apply font-black uppercase leading-[0.9] tracking-tighter;
+    font-size: clamp(2.5rem, 10vw, 8rem);
+    letter-spacing: -0.05em;
+    @apply font-black uppercase leading-[0.9];
   }
 
   .telemetry {
