@@ -3,7 +3,31 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --substrate: #F4F4F0;
+    --ink: #050505;
+  }
+
+  .dark {
+    --substrate: #0A0A0A;
+    --ink: #EAEAEA;
+  }
+
+  * {
+    @apply border-border outline-none transition-none !rounded-none;
+  }
+
   body {
-    @apply bg-background text-text;
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer utilities {
+  .macro-type {
+    @apply font-black uppercase leading-[0.9] tracking-tighter;
+  }
+
+  .telemetry {
+    @apply font-mono uppercase text-[12px];
   }
 }

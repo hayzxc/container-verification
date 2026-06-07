@@ -9,16 +9,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#1A3C5E",
-        accent: "#F0A500",
-        approved: "#27AE60",
-        rejected: "#E74C3C",
-        pending: "#F39C12",
-        background: "#F8FAFC",
-        surface: "#FFFFFF",
-        text: "#0F172A",
-        muted: "#64748B",
-        border: "#E2E8F0"
+        substrate: "var(--substrate)",
+        ink: "var(--ink)",
+        hazard: "#E61919",
+        // Overwrite shadcn tokens
+        background: "var(--substrate)",
+        foreground: "var(--ink)",
+        primary: {
+          DEFAULT: "var(--ink)",
+          foreground: "var(--substrate)",
+        },
+        accent: {
+          DEFAULT: "var(--ink)",
+          foreground: "var(--substrate)",
+        },
+        border: "var(--ink)",
+      },
+      borderRadius: {
+        lg: "0px",
+        md: "0px",
+        sm: "0px",
+      },
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+        mono: ["IBM Plex Mono", "monospace"],
       },
     },
   },
