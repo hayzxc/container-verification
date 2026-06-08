@@ -5,6 +5,7 @@ import { prisma } from "../../db/prisma.js";
 import { AppError } from "../../utils/app-error.js";
 import { parsePagination } from "../../utils/pagination.js";
 import { auditService } from "../audit/audit.service.js";
+import { webhooksService } from "../webhooks/webhooks.service.js";
 import { canTransitionInspectionStatus } from "./status-transition.js";
 
 const detailInclude = {
@@ -194,6 +195,39 @@ export const inspectionsService = {
       ipAddress: requestMeta.ipAddress,
       userAgent: requestMeta.userAgent
     });
+
+    // Dispatch webhook for status change
+    try {
+      await webhooksService.dispatchInspectionStatusChanged({
+        inspectionId: id,
+        containerId: inspection.containerId,
+        previousStatus: inspection.status,
+        currentStatus: updated.status,
+        verifiedBy: actor.id,
+        verifiedAt: updated.verifiedAt ?? new Date()
+      });
+    } catch (error) {
+      console.error("Webhook dispatch failed:", error);
+    }
+
     return updated;
+  },
+
+  async getContainerHistory(containerId: string, actor: Express.User) {
+    const where: Prisma.InspectionSessionWhereInput = { containerId };
+    // Inspectors can only see their own history for a container
+    if (actor.role === UserRole.INSPECTOR) where.inspectorId = actor.id;
+
+    const items = await prisma.inspectionSession.findMany({
+      where,
+      include: {
+        inspector: { select: { id: true, fullName: true, email: true } },
+        verifiedBy: { select: { id: true, fullName: true } },
+        _count: { select: { photos: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return items;
   }
 };

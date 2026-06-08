@@ -3,7 +3,8 @@ import { AuditAction, InspectionStatus, UserRole, type PhotoAngle } from "@prism
 import { prisma } from "../../db/prisma.js";
 import { AppError } from "../../utils/app-error.js";
 import { auditService } from "../audit/audit.service.js";
-import { validateImageUpload } from "./upload-validator.js";
+import { validateImageUpload, generateThumbnail } from "./upload-validator.js";
+import { storageService } from "../../config/storage.js";
 
 function assertCanMutatePhoto(inspection: { inspectorId: string; status: InspectionStatus }, actor: Express.User) {
   if (actor.role === UserRole.ADMIN) return;
@@ -45,20 +46,56 @@ export const photosService = {
     const idPart = crypto.randomUUID();
     const storageKey = `inspections/${input.inspectionId}/${input.photoAngle}/${Date.now()}-${idPart}.${validated.ext}`;
 
+    // Upload original to object storage
+    try {
+      await storageService.upload(storageKey, input.file.buffer, validated.mimeType);
+    } catch (error) {
+      console.error("Storage upload failed (original):", error);
+      // Continue — photo metadata still valuable even without storage
+    }
+
+    // Generate and upload thumbnail
+    let thumbnailKey: string | null = null;
+    try {
+      const thumbnail = await generateThumbnail(input.file.buffer);
+      thumbnailKey = `thumbnails/${input.inspectionId}/${idPart}.webp`;
+      await storageService.upload(thumbnailKey, thumbnail, "image/webp");
+    } catch (error) {
+      console.error("Thumbnail generation/upload failed:", error);
+    }
+
     const photo = await prisma.inspectionPhoto.create({
       data: {
         sessionId: input.inspectionId,
         photoAngle: input.photoAngle,
         storageKey,
+        thumbnailKey,
         mimeType: validated.mimeType,
         fileSizeKb: Math.ceil(input.file.size / 1024),
         width: validated.width,
         height: validated.height,
         resolution: validated.resolution,
+        exifTimestamp: validated.exifTimestamp,
+        deviceInfo: validated.deviceInfo,
+        latitude: validated.latitude,
+        longitude: validated.longitude,
         ocrResult: { create: { status: "QUEUED" } }
       },
       include: { ocrResult: true }
     });
+
+    // Enqueue OCR job (lazy import to avoid circular dependency)
+    try {
+      const { addOcrJob } = await import("../../workers/queues.js");
+      await addOcrJob({
+        photoId: photo.id,
+        inspectionId: input.inspectionId,
+        attempt: 1
+      });
+    } catch (error) {
+      // Worker may not be available in test environment
+      console.error("Failed to enqueue OCR job:", error);
+    }
 
     await auditService.log({
       userId: actor.id,
@@ -75,6 +112,7 @@ export const photosService = {
       id: photo.id,
       photoAngle: photo.photoAngle,
       storageKey: photo.storageKey,
+      storageUrl: null,
       width: photo.width,
       height: photo.height,
       ocrStatus: photo.ocrResult?.status
@@ -88,6 +126,17 @@ export const photosService = {
     });
     if (!photo) throw new AppError("NOT_FOUND", "Photo not found", 404);
     assertCanMutatePhoto(photo.session, actor);
+
+    // Clean up from object storage
+    try {
+      await storageService.delete(photo.storageKey);
+      if (photo.thumbnailKey) {
+        await storageService.delete(photo.thumbnailKey);
+      }
+    } catch (error) {
+      console.error("Storage cleanup failed:", error);
+    }
+
     const deleted = await prisma.inspectionPhoto.delete({ where: { id: photoId } });
     await auditService.log({
       userId: actor.id,

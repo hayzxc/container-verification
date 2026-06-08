@@ -24,4 +24,15 @@ app.use(errorHandler);
 
 app.listen(env.PORT, () => {
   console.log(`API listening on http://localhost:${env.PORT}/api`);
+
+  // Start BullMQ workers (skip in test to avoid Redis dependency)
+  if (env.NODE_ENV !== "test") {
+    import("./workers/ocr.worker.js")
+      .then(({ startOcrWorker }) => startOcrWorker())
+      .catch((error) => console.error("Failed to start OCR worker:", error));
+
+    import("./workers/webhook.worker.js")
+      .then(({ startWebhookWorker }) => startWebhookWorker())
+      .catch((error) => console.error("Failed to start webhook worker:", error));
+  }
 });
